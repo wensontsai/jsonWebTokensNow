@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
 
@@ -25,6 +26,8 @@ app.use(bodyParser.json());
 
 // use morgan to log requests to the console.
 app.use(morgan('dev'));
+// cookie Parser
+app.use(cookieParser());
 
 
 // =================
@@ -61,6 +64,11 @@ app.get('/setup', function(req,res){
 // =================
 // get router instance for api routes
 var apiRoutes = express.Router();
+
+// apply the routes to our application with the prefix '/api'
+// ------------------------------------
+app.use('/api', apiRoutes);
+
 
 
 // route to auth user (POST http://localhost:8080/api/authenticate)
@@ -104,7 +112,7 @@ apiRoutes.use(function(req, res, next){
 			}
 
 			req.decoded = decoded;
-console.log(req.decoded);
+			res.cookie(token, 'cookie_value').send('Token is set as cookie');
 			next();
 		});
 	} else {
@@ -114,6 +122,8 @@ console.log(req.decoded);
 		});
 	}
 });
+
+
 
 // route to show a random message (GET http://localhost:8080/api/)
 apiRoutes.get('/', function(req, res){
@@ -127,9 +137,6 @@ apiRoutes.get('/users', function(req, res){
 });
 
 
-// apply the routes to our application with the prefix '/api'
-// ------------------------------------
-app.use('/api', apiRoutes);
 
 
 
