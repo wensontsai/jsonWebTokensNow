@@ -35,14 +35,15 @@ app.get('/', function(req, res){
 });
 app.get('/setup', function(req,res){
 
-	// ::::::::: FOR TESTING ::::::::::::::::
+
+// ::::::::: FOR TESTING ONLY ::::::::::::::::
 		// create a sample user
 		var nick = new User({
 			name: 'person1',
 			password: 'password',
 			admin: true
 		});
-	// ::::::::: FOR TESTING ::::::::::::::::
+// ::::::::: FOR TESTING ONLY ::::::::::::::::
 
 
 	nick.save(function(err){
@@ -61,23 +62,23 @@ app.get('/setup', function(req,res){
 // get router instance for api routes
 var apiRoutes = express.Router();
 
+
 // route to auth user (POST http://localhost:8080/api/authenticate)
+// ------------------------------------
 apiRoutes.post('/authenticate', function(req, res){
 	// find user
 	User.findOne({name: req.body.name}, function(err, user){
 		if (err) throw err;
 
 		if (!user) {
-			res.json( {success: false, message: 'Authentication failed.  User not found!'} );
-			return;
+			return res.json( {success: false, message: 'Authentication failed.  User not found!'} );
 		} 
 		if(user.password !== req.body.password){
-			res.json( {success: false, message: 'Authentication failed.  Wrong password!'} );
-			return;
+			return res.json( {success: false, message: 'Authentication failed.  Wrong password!'} );
 		}
 
 		var token = jwt.sign(user, app.get('secret'), {
-			expiresInMinutes: 1440 //expires in 24hrs
+			expiresIn: 1440 //expires in 24hrs
 		});
 
 		res.json({
@@ -89,6 +90,30 @@ apiRoutes.post('/authenticate', function(req, res){
 });
 
 // route for middleware to verify token
+// ------------------------------------
+apiRoutes.use(function(req, res, next){
+	// check header, or url parameters, or post parameters for token
+	var token = req.body.token || req.query.token || req.headers['x-access-token'];
+
+	// decode token
+	if (token) {
+		// verify secret and check expiration
+		jwt.verify(token, app.get('secret'), function(err, decoded){
+			if (err) {
+				return res.json( {success: false, message: 'Failed to authenticate token!'} );
+			}
+
+			req.decoded = decoded;
+console.log(req.decoded);
+			next();
+		});
+	} else {
+		return res.status(403).send({
+			success: false,
+			message: 'No token provided!'
+		});
+	}
+});
 
 // route to show a random message (GET http://localhost:8080/api/)
 apiRoutes.get('/', function(req, res){
@@ -101,7 +126,9 @@ apiRoutes.get('/users', function(req, res){
 	});
 });
 
+
 // apply the routes to our application with the prefix '/api'
+// ------------------------------------
 app.use('/api', apiRoutes);
 
 
