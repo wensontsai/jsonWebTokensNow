@@ -59,6 +59,7 @@ app.get('/setup', function(req,res){
 
 
 
+
 // =================
 // API Routes
 // =================
@@ -68,7 +69,6 @@ var apiRoutes = express.Router();
 // apply the routes to our application with the prefix '/api'
 // ------------------------------------
 app.use('/api', apiRoutes);
-
 
 
 // route to auth user (POST http://localhost:8080/api/authenticate)
@@ -124,7 +124,6 @@ apiRoutes.use(function(req, res, next){
 });
 
 
-
 // route to show a random message (GET http://localhost:8080/api/)
 apiRoutes.get('/', function(req, res){
 	res.json( {message: 'Welcome to JWT HAWT API'});
@@ -135,6 +134,7 @@ apiRoutes.get('/users', function(req, res){
 		res.json(users);
 	});
 });
+
 
 
 
