@@ -75,6 +75,9 @@ app.use('/api', apiRoutes);
 // ------------------------------------
 apiRoutes.post('/authenticate', function(req, res){
 	// find user
+
+	console.log(req.body);
+
 	User.findOne({name: req.body.name}, function(err, user){
 		if (err) throw err;
 
@@ -99,7 +102,7 @@ apiRoutes.post('/authenticate', function(req, res){
 
 // route for middleware to verify token
 // ------------------------------------
-apiRoutes.use(function(req, res, next){
+app.use(function(req, res, next){
 	// check header, or url parameters, or post parameters for token
 	var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
@@ -113,7 +116,7 @@ apiRoutes.use(function(req, res, next){
 
 			req.decoded = decoded;
 			res.cookie(token, 'cookie_value').send('Token is set as cookie');
-			next();
+			// next();
 		});
 	} else {
 		return res.status(403).send({
